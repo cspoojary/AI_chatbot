@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chaith Chatbot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="chat-container">
+        <h2>Chaith's Chatbot</h2>
+
+        <div id="chat-box"></div>
+
+        <div class="input-area">
+            <input type="text" id="user-input" placeholder="Type Your Question" />
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+<script>
+const inputBox = document.getElementById("user-input");
+
+inputBox.addEventListener("keypress", function(event) {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        sendMessage();
+    }
+});
+
+async function sendMessage() {
+    const input = document.getElementById("user-input");
+    const message = input.value;
+
+    if (!message) return;
+
+    const chatBox = document.getElementById("chat-box");
+
+    chatBox.innerHTML += `<div class="user">You: ${message}</div>`;
+    input.value = "";
+
+    const response = await fetch("/chat", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ message })
+    });
+
+    const data = await response.json();
+
+    const botDiv = document.createElement("div");
+    botDiv.className = "AI";
+    botDiv.innerHTML = "AI: ";
+    chatBox.appendChild(botDiv);
+
+    typeEffect(botDiv, data.reply);
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function typeEffect(element, text) {
+    const words = text.split(" ");
+    let i = 0;
+
+    function typeWord() {
+        if (i < words.length) {
+            element.innerHTML += words[i] + " ";
+            i++;
+            setTimeout(typeWord, 80);
+        }
+    }
+
+    typeWord();
+}
+</script>
+
+</body>
+</html>
